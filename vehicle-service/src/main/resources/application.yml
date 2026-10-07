@@ -1,0 +1,36 @@
+spring:
+  application:
+    name: vehicle-service
+  datasource:
+    jndi-name: java:comp/env/jdbc/vehicles
+  jpa:
+    hibernate:
+      ddl-auto: none
+    open-in-view: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+soa:
+  db-schema: soa
+  cors:
+    allowed-origins: ""
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:38761/eureka/}
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+    non-secure-port-enabled: false
+    secure-port-enabled: true
+    secure-port: 28581
+    status-page-url:  https://${EUREKA_HOST:localhost}:28581/vehicle-service/actuator/info
+    health-check-url: https://${EUREKA_HOST:localhost}:28581/vehicle-service/actuator/health
+
+logging:
+  level:
+    org.springframework.web: INFO
+    com.netflix.discovery: INFO
