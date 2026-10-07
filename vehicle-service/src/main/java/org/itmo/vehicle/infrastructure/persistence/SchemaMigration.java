@@ -1,34 +1,32 @@
 package org.itmo.vehicle.infrastructure.persistence;
 
-import jakarta.annotation.Resource;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.context.Initialized;
-import jakarta.enterprise.event.Observes;
-import jakarta.inject.Inject;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.flywaydb.core.Flyway;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 import javax.sql.DataSource;
 
-@ApplicationScoped
+/**
+ * Flyway-миграции. Spring Boot сам вызовет {@code Flyway.migrate()}
+ * при старте приложения, если бин Flyway есть в контексте.
+ *
+ * DataSource берётся Spring'ом из JNDI (spring.datasource.jndi-name
+ * = java:comp/env/jdbc/vehicles), схема — из soa.db-schema.
+ */
+@Configuration(proxyBeanMethods = false)
 public class SchemaMigration {
 
-    @Resource(lookup = "jdbc/vehicles")
-    private DataSource dataSource;
-
-    @Inject
-    @ConfigProperty(name = "soa.db-schema")
-    private String schema;
-
-    void migrate(@Observes @Initialized(ApplicationScoped.class) Object applicationStarted) {
-        Flyway.configure()
+    @Bean
+    Flyway flyway(DataSource dataSource,
+                  @Value("${soa.db-schema}") String schema) {
+        return Flyway.configure()
                 .dataSource(dataSource)
                 .schemas(schema)
                 .table("soa_flyway_history")
                 .baselineOnMigrate(true)
                 .baselineVersion("0")
                 .locations("classpath:db/migration")
-                .load()
-                .migrate();
+                .load();
     }
 }
