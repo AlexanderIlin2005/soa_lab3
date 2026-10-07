@@ -1,44 +1,52 @@
 plugins {
     id 'war'
     alias(libs.plugins.openapi.generator)
+    id 'org.springframework.boot' version '3.5.16'
+    id 'io.spring.dependency-management' version '1.1.7'
 }
 
-configurations.named('runtimeClasspath') {
-    exclude group: 'com.fasterxml.jackson.core', module: 'jackson-annotations'
+configurations.configureEach {
+    exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
 }
 
 dependencies {
-    providedCompile libs.jakartaee.web.api
-    providedCompile libs.microprofile.config.api
-    providedCompile libs.jersey.server
-    providedCompile libs.jersey.media.json.jackson
+    implementation platform(libs.springBootDependencies)
+    implementation platform(libs.springCloudDependencies)
 
-    providedCompile platform(libs.payara.jackson.bom)
-    providedCompile libs.jackson.databind
-    implementation platform(libs.payara.jackson.bom)
-    implementation libs.jackson.datatype.jsr310
+    implementation(libs.springBootStarterWeb) {
+        exclude group: 'org.springframework.boot', module: 'spring-boot-starter-tomcat'
+    }
+    implementation libs.springBootStarterDataJpa
+    implementation libs.springBootStarterValidation
 
-    implementation libs.flyway.core
-    implementation libs.flyway.database.postgresql
+    implementation libs.springCloudStarterEurekaClient
+    implementation libs.springCloudStarterConfig
 
-    testImplementation platform(libs.junit.bom)
-    testImplementation libs.junit.jupiter
-    testImplementation libs.assertj.core
-    testImplementation libs.jakartaee.web.api
-    testRuntimeOnly libs.junit.platform.launcher
+    implementation libs.flywayCore
+    implementation libs.flywayDatabasePostgresql
+    implementation libs.postgresql
+
+    providedCompile libs.jakartaServletApi
+    providedCompile libs.jakartaValidationApi
+    providedCompile libs.jakartaAnnotationApi
+
+    testImplementation platform(libs.junitBom)
+    testImplementation libs.junitJupiter
+    testImplementation libs.assertjCore
+    testImplementation libs.springBootStarterTest
+    testRuntimeOnly libs.junitPlatformLauncher
 }
 
 def generatedSources = layout.buildDirectory.dir('generated/openapi')
 
 openApiGenerate {
-    generatorName = 'jaxrs-spec'
+    generatorName = 'spring'
     inputSpec = rootProject.file('openapi/vehicle-service.yaml').absolutePath
     outputDir = generatedSources.get().asFile.absolutePath
     cleanupOutput = true
     templateDir = file('openapi-templates').absolutePath
     apiPackage = 'org.itmo.vehicle.infrastructure.web.generated.api'
     modelPackage = 'org.itmo.vehicle.infrastructure.web.generated.model'
-    // VehicleDto vs the domain's Vehicle: no clash of simple names in mappers.
     modelNameSuffix = 'Dto'
     globalProperties = [apis: '', models: '']
     generateApiTests = false
@@ -46,37 +54,28 @@ openApiGenerate {
     generateApiDocumentation = false
     generateModelDocumentation = false
     configOptions = [
-            interfaceOnly          : 'true',
-            returnResponse         : 'true',
-            useJakartaEe           : 'true',
-            useBeanValidation      : 'true',
-            useSwaggerAnnotations  : 'false',
-            useTags                : 'true',
-            dateLibrary            : 'java8',
-            openApiNullable        : 'false',
-            hideGenerationTimestamp: 'true',
-            sourceFolder           : 'src/main/java',
+            interfaceOnly             : 'true',
+            skipDefaultInterface      : 'true',
+            useSpringBoot3            : 'true',
+            useTags                   : 'true',
+            useBeanValidation         : 'true',
+            useSpringBuiltInValidation: 'true',
+            openApiNullable           : 'false',
+            documentationProvider     : 'none',
+            annotationLibrary         : 'none',
+            dateLibrary               : 'java8',
+            hideGenerationTimestamp   : 'true',
+            sourceFolder              : 'src/main/java',
     ]
 }
 
 sourceSets.main.java.srcDir(generatedSources.map { it.dir('src/main/java') })
 tasks.named('compileJava') { dependsOn tasks.named('openApiGenerate') }
 
-tasks.named('test') {
-    useJUnitPlatform()
-}
-
-//   ./gradlew :vehicle-service:contractTest
-//   ./gradlew :vehicle-service:contractTest -Pcontract.certificates=<dir with vehicle.crt>
-sourceSets {
-    contractTest
-}
-configurations {
-    contractTestImplementation.extendsFrom testImplementation
-    contractTestRuntimeOnly.extendsFrom testRuntimeOnly
-}
-
+tasks.named('test') { useJUnitPlatform() }
 
 war {
     archiveFileName = 'vehicle-service.war'
 }
+
+tasks.named('bootWar') { enabled = false }
