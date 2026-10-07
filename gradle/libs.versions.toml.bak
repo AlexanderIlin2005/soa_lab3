@@ -8,7 +8,6 @@ payara = "6.2025.11"
 spring-boot = "3.5.16"
 postgresql = "42.7.13"
 openapi-generator = "7.25.0"
-spring-cloud = "2025.0.0"
 # The Jackson bundled in Payara 6.2025.11 (final Payara 6 release, so it
 # never moves). vehicle-service uses the server's copy, see its build file.
 payara-jackson = "2.20.0"
@@ -48,15 +47,6 @@ jakarta-validation-api = { module = "jakarta.validation:jakarta.validation-api" 
 jakarta-annotation-api = { module = "jakarta.annotation:jakarta.annotation-api" }
 jackson-dataformat-xml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-xml" }
 jackson-dataformat-yaml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml" }
-springCloudDependencies = { module = "org.springframework.cloud:spring-cloud-dependencies", version.ref = "spring-cloud" }
-springCloudStarterConfig = { module = "org.springframework.cloud:spring-cloud-starter-config" }
-springCloudConfigServer = { module = "org.springframework.cloud:spring-cloud-config-server" }
-springCloudStarterBootstrap = { module = "org.springframework.cloud:spring-cloud-starter-bootstrap" }
-springCloudStarterEurekaServer = { module = "org.springframework.cloud:spring-cloud-starter-netflix-eureka-server" }
-springCloudStarterEurekaClient = { module = "org.springframework.cloud:spring-cloud-starter-netflix-eureka-client" }
-springCloudStarterLoadbalancer = { module = "org.springframework.cloud:spring-cloud-starter-loadbalancer" }
-springCloudStarterGateway = { module = "org.springframework.cloud:spring-cloud-starter-gateway" }
-
 spring-test = { module = "org.springframework:spring-test" }
 
 [plugins]

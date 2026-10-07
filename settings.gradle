@@ -1,3 +1,8 @@
 rootProject.name = 'lab3'
 
 include 'vehicle-service', 'shop-service', 'web-client'
+
+// Лабораторная работа №3: компоненты Spring Cloud
+include 'lab3-cloud:eureka-server'
+include 'lab3-cloud:config-server'
+include 'lab3-cloud:api-gateway'
