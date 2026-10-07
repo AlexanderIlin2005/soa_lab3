@@ -1,0 +1,17 @@
+/.idea/
+/.gradle/
+/.gradle/*
+/codebase.txt
+/full_tree.sh
+/vehicle-service/build/
+/shop-service/build/
+/web-client/build/
+/.gradle/9.7.1/
+/.gradle/buildOutputCleanup/
+/.gradle/vcs-1/
+.gradle/
+build/
+*/build/
+**/build/
+openapi.reference/
+legacy/
