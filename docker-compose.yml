@@ -1,0 +1,52 @@
+# Локальный стенд для отладки лабы 3.
+# Поднимает PostgreSQL 16 и Payara 6 (домен для vehicle-service).
+# Порт 28581 — как в deployment.puml, чтобы web-client/config.js не менять.
+# Порт 28548 — admin console Payara (только для локальной отладки, наружу не выставляем).
+#
+# Запуск:   docker compose up -d
+# Логи:     docker compose logs -f payara-vehicle
+# Остановка: docker compose down
+# Полная очистка (включая БД): docker compose down -v
+
+services:
+  pg:
+    image: postgres:16
+    container_name: lab3-pg
+    environment:
+      POSTGRES_USER: soa
+      POSTGRES_PASSWORD: soa
+      POSTGRES_DB: studs
+    ports:
+      - "127.0.0.1:15432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U soa -d studs"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  payara-vehicle:
+    image: payara/server-full:6.2025.11-jdk17
+    container_name: lab3-payara-vehicle
+    depends_on:
+      pg:
+        condition: service_healthy
+    environment:
+      AS_ADMIN_PASSWORD: adminadmin
+      # ВАЖНО: пути указывают внутрь смонтированного тома ./docker/payara-vehicle
+      # (он появляется в контейнере как /opt/payara/custom).
+      POSTBOOT_COMMANDS: /opt/payara/custom/post-boot-commands.asadmin
+      PREBOOT_COMMANDS:  /opt/payara/custom/pre-boot-commands.asadmin
+    ports:
+      - "28581:8181"   # HTTPS-порт Payara снаружи как 28581
+      - "28582:8080"   # HTTP-порт Payara снаружи как 28582 (для отладки)
+      - "127.0.0.1:28548:4848"
+    volumes:
+      - ./docker/payara-vehicle:/opt/payara/custom:ro
+      - ./docker/payara-vehicle/postgresql.jar:/opt/payara/appserver/glassfish/domains/domain1/lib/postgresql.jar:ro
+      - ./vehicle-service/build/libs/vehicle-service.war:/opt/payara/deployments/vehicle-service.war:ro
+
+volumes:
+  pgdata:

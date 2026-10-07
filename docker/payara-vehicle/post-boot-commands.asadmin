@@ -1,0 +1,4 @@
+create-jdbc-connection-pool --datasourceclassname org.postgresql.ds.PGSimpleDataSource --restype javax.sql.DataSource --property user=soa:password=soa:serverName=pg:portNumber=5432:databaseName=studs jdbc/vehiclesPool
+create-jdbc-resource --connectionpoolid jdbc/vehiclesPool jdbc/vehicles
+ping-connection-pool jdbc/vehiclesPool
+set-config-property --source=domain --propertyName=soa.db-schema --propertyValue=soa
