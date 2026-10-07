@@ -1,5 +1,5 @@
 # Локальный стенд для отладки лабы 3.
-# Поднимает PostgreSQL 16 и Payara 6 (домен для vehicle-service).
+# Поднимает PostgreSQL 16, Payara 6 (домен для vehicle-service) и Eureka Server.
 # Порт 28581 — как в deployment.puml, чтобы web-client/config.js не менять.
 # Порт 28548 — admin console Payara (только для локальной отладки, наружу не выставляем).
 #
@@ -39,6 +39,10 @@ services:
       # (он появляется в контейнере как /opt/payara/custom).
       POSTBOOT_COMMANDS: /opt/payara/custom/post-boot-commands.asadmin
       PREBOOT_COMMANDS:  /opt/payara/custom/pre-boot-commands.asadmin
+      # Eureka Client: URL сервера в docker-сети и host, на который ссылаются
+      # ссылки в дашборде Eureka (status-page-url и т.п.).
+      EUREKA_URL:  "http://eureka:38761/eureka/"
+      EUREKA_HOST: "localhost"
     ports:
       - "28581:8181"   # HTTPS-порт Payara снаружи как 28581
       - "28582:8080"   # HTTP-порт Payara снаружи как 28582 (для отладки)
@@ -47,6 +51,17 @@ services:
       - ./docker/payara-vehicle:/opt/payara/custom:ro
       - ./docker/payara-vehicle/postgresql.jar:/opt/payara/appserver/glassfish/domains/domain1/lib/postgresql.jar:ro
       - ./vehicle-service/build/libs/vehicle-service.war:/opt/payara/deployments/vehicle-service.war:ro
+
+  eureka:
+    image: eclipse-temurin:17-jre
+    container_name: lab3-eureka
+    ports:
+      - "38761:38761"
+    volumes:
+      - ./lab3-cloud/eureka-server/build/libs/eureka-server.jar:/app/eureka-server.jar:ro
+    environment:
+      EUREKA_PORT: "38761"
+    command: ["java", "-jar", "/app/eureka-server.jar"]
 
 volumes:
   pgdata:
