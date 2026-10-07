@@ -16,3 +16,5 @@ build/
 openapi.reference/
 legacy/
 /lab3-step1-prepare.sh
+/lab3-step2a-vehicle-spring.sh
+/gradle/
