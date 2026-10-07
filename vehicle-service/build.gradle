@@ -22,9 +22,13 @@ dependencies {
     implementation libs.springCloudStarterEurekaClient
     implementation libs.springCloudStarterConfig
 
+    implementation libs.jackson.dataformat.xml
+    implementation libs.jackson.dataformat.yaml
     implementation libs.flyway.core
     implementation libs.flyway.database.postgresql
     implementation libs.postgresql
+
+    implementation "ch.qos.logback:logback-classic"
 
     providedCompile libs.jakarta.servlet.api
     providedCompile libs.jakarta.validation.api

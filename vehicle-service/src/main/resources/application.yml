@@ -1,6 +1,8 @@
 spring:
   application:
     name: vehicle-service
+  config:
+    import: "optional:configserver:${CONFIG_SERVER_URL:http://config-server:38888}"
   datasource:
     jndi-name: java:comp/env/jdbc/vehicles
   jpa:

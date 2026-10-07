@@ -5,20 +5,19 @@ import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Path;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.UriInfo;
-import jakarta.ws.rs.ext.ExceptionMapper;
-import jakarta.ws.rs.ext.Provider;
+import org.itmo.vehicle.infrastructure.web.generated.model.ProblemDto;
 import org.itmo.vehicle.infrastructure.web.generated.model.ValidationErrorDto;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
-@Provider
-public class ConstraintViolationExceptionMapper implements ExceptionMapper<ConstraintViolationException> {
+@RestControllerAdvice
+public class ConstraintViolationExceptionMapper {
 
     private static final Map<String, String> PATTERN_MEANINGS = Map.of(
             "^\\s*\\S[\\s\\S]*$",
@@ -29,16 +28,13 @@ public class ConstraintViolationExceptionMapper implements ExceptionMapper<Const
             "^-?(id|name|coordinates\\.x|coordinates\\.y|creationDate|enginePower|numberOfWheels|mileage|type|fuelType)$",
             "must be a field name, optionally prefixed with - for descending order");
 
-    @Context
-    private UriInfo request;
-
-    @Override
-    public Response toResponse(ConstraintViolationException exception) {
+    @ExceptionHandler(ConstraintViolationException.class)
+    ResponseEntity<ProblemDto> invalid(ConstraintViolationException exception) {
         List<ValidationErrorDto> errors = exception.getConstraintViolations().stream()
                 .map(violation -> Problems.error(pointer(violation), message(violation)))
                 .sorted(Comparator.comparing(ValidationErrorDto::getField))
                 .toList();
-        return Problems.response(400, "The request violates constraints of the contract.", request, errors);
+        return Problems.response(400, "The request violates constraints of the contract.", errors);
     }
 
     private static String message(ConstraintViolation<?> violation) {

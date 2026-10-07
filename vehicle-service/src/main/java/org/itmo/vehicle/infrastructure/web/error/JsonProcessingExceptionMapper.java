@@ -1,42 +1,29 @@
 package org.itmo.vehicle.infrastructure.web.error;
 
-import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import com.fasterxml.jackson.databind.exc.ValueInstantiationException;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.UriInfo;
-import jakarta.ws.rs.ext.ExceptionMapper;
-import jakarta.ws.rs.ext.Provider;
+import org.itmo.vehicle.infrastructure.web.generated.model.ProblemDto;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-@Provider
-public class JsonProcessingExceptionMapper implements ExceptionMapper<JsonProcessingException> {
+@RestControllerAdvice
+public class JsonProcessingExceptionMapper {
 
-    private static final Logger LOG = Logger.getLogger(JsonProcessingExceptionMapper.class.getName());
-
-    @Context
-    private UriInfo request;
-
-    @Override
-    public Response toResponse(JsonProcessingException exception) {
-        if (exception.getProcessor() instanceof JsonGenerator) {
-            LOG.log(Level.SEVERE, "Cannot serialize a response", exception);
-            return Problems.response(500, "Internal service error.", request);
-        }
+    @ExceptionHandler(JsonProcessingException.class)
+    ResponseEntity<ProblemDto> badJson(JsonProcessingException exception) {
         if (exception instanceof JsonMappingException mapping && !mapping.getPath().isEmpty()) {
-            return Problems.response(400, "The request body does not match the schema.", request,
+            return Problems.response(400, "The request body does not match the schema.",
                     List.of(Problems.error(pointer(mapping), describe(mapping))));
         }
-        return Problems.response(400, "The request body is not valid JSON: " + exception.getOriginalMessage(), request);
+        return Problems.response(400, "The request body is not valid JSON: " + exception.getOriginalMessage());
     }
 
     private static String pointer(JsonMappingException exception) {
@@ -52,7 +39,6 @@ public class JsonProcessingExceptionMapper implements ExceptionMapper<JsonProces
             return "is not a property of this object";
         }
         if (exception instanceof ValueInstantiationException && exception.getCause() != null) {
-            // e.g. an unknown enumeration member: "Unexpected value 'TANK'"
             return exception.getCause().getMessage();
         }
         if (exception instanceof InvalidFormatException format) {
