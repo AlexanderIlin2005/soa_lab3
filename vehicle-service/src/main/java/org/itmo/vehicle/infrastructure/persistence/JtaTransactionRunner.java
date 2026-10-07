@@ -1,12 +1,17 @@
 package org.itmo.vehicle.infrastructure.persistence;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.transaction.Transactional;
 import org.itmo.vehicle.application.TransactionRunner;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.function.Supplier;
 
-@ApplicationScoped
+/**
+ * Spring-вариант TransactionRunner. {@code @Transactional} теперь
+ * из Spring Framework, а не из Jakarta EE — управление транзакциями
+ * идёт через JpaTransactionManager поверх DataSource из JNDI.
+ */
+@Component
 public class JtaTransactionRunner implements TransactionRunner {
 
     @Override
