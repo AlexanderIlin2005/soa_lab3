@@ -1,10 +1,12 @@
 spring:
+  jackson:
+    find-modules: false
   application:
     name: vehicle-service
   config:
     import: "optional:configserver:${CONFIG_SERVER_URL:http://config-server:38888}"
   datasource:
-    jndi-name: java:comp/env/jdbc/vehicles
+    jndi-name: jdbc/vehicles
   jpa:
     hibernate:
       ddl-auto: none
@@ -12,6 +14,20 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+        # Hibernate 6 при создании FormatMapper вызывает
+        # ObjectMapper.findAndRegisterModules(), который через ServiceLoader
+        # находит JakartaXmlBindAnnotationModule из Payara и падает с
+        # "not a subtype" (разные classloader'ы). Наш NoScanJsonFormatMapper
+        # этого не делает.
+        type:
+          json_format_mapper: org.itmo.vehicle.infrastructure.persistence.NoScanJsonFormatMapper
+  flyway:
+    enabled: true
+    schemas: soa
+    table: soa_flyway_history
+    baseline-on-migrate: true
+    baseline-version: "0"
+    locations: classpath:db/migration
 
 soa:
   db-schema: soa

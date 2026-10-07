@@ -7,6 +7,23 @@ plugins {
 
 configurations.configureEach {
     exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+    exclude group: 'com.fasterxml.jackson.module', module: 'jackson-module-jakarta-xmlbind-annotations'
+    resolutionStrategy {
+        // Подмена координат — сильнее, чем force, и обходит BOM Spring Boot.
+        // Прижимаем версию Jackson в WAR к той, что даёт Payara 6.2025.11,
+        // чтобы модуль JakartaXmlBindAnnotationModule из Payara
+        // наследовался от Module из WAR без VerifyError.
+        dependencySubstitution {
+            substitute module('com.fasterxml.jackson.core:jackson-core') using module('com.fasterxml.jackson.core:jackson-core:2.20.0')
+            substitute module('com.fasterxml.jackson.core:jackson-databind') using module('com.fasterxml.jackson.core:jackson-databind:2.20.0')
+            substitute module('com.fasterxml.jackson.core:jackson-annotations') using module('com.fasterxml.jackson.core:jackson-annotations:2.20')
+            substitute module('com.fasterxml.jackson.dataformat:jackson-dataformat-xml') using module('com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.20.0')
+            substitute module('com.fasterxml.jackson.dataformat:jackson-dataformat-yaml') using module('com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.20.0')
+            substitute module('com.fasterxml.jackson.datatype:jackson-datatype-jsr310') using module('com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.20.0')
+            substitute module('com.fasterxml.jackson.datatype:jackson-datatype-jdk8') using module('com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.20.0')
+            substitute module('com.fasterxml.jackson.module:jackson-module-parameter-names') using module('com.fasterxml.jackson.module:jackson-module-parameter-names:2.20.0')
+        }
+    }
 }
 
 dependencies {

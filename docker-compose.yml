@@ -51,6 +51,7 @@ services:
       - ./docker/payara-vehicle:/opt/payara/custom:ro
       - ./docker/payara-vehicle/postgresql.jar:/opt/payara/appserver/glassfish/domains/domain1/lib/postgresql.jar:ro
       - ./vehicle-service/build/libs/vehicle-service.war:/opt/payara/deployments/vehicle-service.war:ro
+      # работает при каждом docker compose up).
 
   eureka:
     image: eclipse-temurin:17-jre
