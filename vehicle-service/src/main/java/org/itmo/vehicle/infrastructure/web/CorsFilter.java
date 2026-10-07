@@ -1,50 +1,55 @@
 package org.itmo.vehicle.infrastructure.web;
 
-import jakarta.ws.rs.HttpMethod;
-import jakarta.ws.rs.container.*;
-import jakarta.ws.rs.core.MultivaluedMap;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.ext.Provider;
-import org.eclipse.microprofile.config.ConfigProvider;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
 
-import java.util.List;
+import java.io.IOException;
 import java.util.Set;
 
-@Provider
-@PreMatching
-public class CorsFilter implements ContainerRequestFilter, ContainerResponseFilter {
+/**
+ * CORS для web-client, открытого с se.ifmo.ru. Заголовки ставятся
+ * только для origins из soa.cors.allowed-origins; остальные — без CORS,
+ * браузер сам не даст странице читать ответ.
+ */
+@Component
+@Order(Ordered.HIGHEST_PRECEDENCE)
+public class CorsFilter extends OncePerRequestFilter {
 
-    private static final String REQUEST_METHOD = "Access-Control-Request-Method";
+    private final Set<String> allowedOrigins;
 
-    private final Set<String> allowedOrigins = Set.copyOf(ConfigProvider.getConfig()
-            .getOptionalValues("soa.cors.allowed-origins", String.class)
-            .orElse(List.of()));
-
-    @Override
-    public void filter(ContainerRequestContext request) {
-        if (isPreflight(request)) {
-            request.abortWith(Response.noContent().build());
-        }
+    public CorsFilter(@Value("${soa.cors.allowed-origins:}") Set<String> allowedOrigins) {
+        this.allowedOrigins = Set.copyOf(allowedOrigins);
     }
 
     @Override
-    public void filter(ContainerRequestContext request, ContainerResponseContext response) {
-        String origin = request.getHeaderString("Origin");
-        if (origin == null || !allowedOrigins.contains(origin)) {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+            throws ServletException, IOException {
+        String origin = request.getHeader("Origin");
+        boolean allowed = origin != null && allowedOrigins.contains(origin);
+        boolean preflight = "OPTIONS".equals(request.getMethod())
+                && request.getHeader("Access-Control-Request-Method") != null;
+
+        if (allowed) {
+            response.setHeader("Access-Control-Allow-Origin", origin);
+            response.addHeader("Vary", "Origin");
+            response.setHeader("Access-Control-Expose-Headers", "Location");
+        }
+        if (preflight) {
+            if (allowed) {
+                response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+                response.setHeader("Access-Control-Allow-Headers", "Content-Type");
+                response.setHeader("Access-Control-Max-Age", "3600");
+            }
+            response.setStatus(HttpServletResponse.SC_NO_CONTENT);
             return;
         }
-        MultivaluedMap<String, Object> headers = response.getHeaders();
-        headers.putSingle("Access-Control-Allow-Origin", origin);
-        headers.add("Vary", "Origin");
-        headers.putSingle("Access-Control-Expose-Headers", "Location");
-        if (isPreflight(request)) {
-            headers.putSingle("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
-            headers.putSingle("Access-Control-Allow-Headers", "Content-Type");
-            headers.putSingle("Access-Control-Max-Age", "3600");
-        }
-    }
-
-    private static boolean isPreflight(ContainerRequestContext request) {
-        return HttpMethod.OPTIONS.equals(request.getMethod()) && request.getHeaderString(REQUEST_METHOD) != null;
+        chain.doFilter(request, response);
     }
 }
