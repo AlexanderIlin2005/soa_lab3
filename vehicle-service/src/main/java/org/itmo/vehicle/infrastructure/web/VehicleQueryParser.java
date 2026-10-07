@@ -1,9 +1,9 @@
 package org.itmo.vehicle.infrastructure.web;
 
-import jakarta.enterprise.context.ApplicationScoped;
 import org.itmo.vehicle.domain.FuelType;
 import org.itmo.vehicle.domain.VehicleType;
 import org.itmo.vehicle.domain.query.*;
+import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeParseException;
@@ -11,7 +11,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-@ApplicationScoped
+@Component
 public class VehicleQueryParser {
 
     private static final Map<String, Operator> OPERATORS = Map.of(
