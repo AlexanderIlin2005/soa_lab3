@@ -10,31 +10,31 @@ configurations.configureEach {
 }
 
 dependencies {
-    implementation platform(libs.springBootDependencies)
+    implementation platform(libs.spring.boot.dependencies)
     implementation platform(libs.springCloudDependencies)
 
-    implementation(libs.springBootStarterWeb) {
+    implementation(libs.spring.boot.starter.web) {
         exclude group: 'org.springframework.boot', module: 'spring-boot-starter-tomcat'
     }
-    implementation libs.springBootStarterDataJpa
-    implementation libs.springBootStarterValidation
+    implementation libs.spring.boot.starter.data.jpa
+    implementation libs.spring.boot.starter.validation
 
     implementation libs.springCloudStarterEurekaClient
     implementation libs.springCloudStarterConfig
 
-    implementation libs.flywayCore
-    implementation libs.flywayDatabasePostgresql
+    implementation libs.flyway.core
+    implementation libs.flyway.database.postgresql
     implementation libs.postgresql
 
-    providedCompile libs.jakartaServletApi
-    providedCompile libs.jakartaValidationApi
-    providedCompile libs.jakartaAnnotationApi
+    providedCompile libs.jakarta.servlet.api
+    providedCompile libs.jakarta.validation.api
+    providedCompile libs.jakarta.annotation.api
 
-    testImplementation platform(libs.junitBom)
-    testImplementation libs.junitJupiter
-    testImplementation libs.assertjCore
-    testImplementation libs.springBootStarterTest
-    testRuntimeOnly libs.junitPlatformLauncher
+    testImplementation platform(libs.junit.bom)
+    testImplementation libs.junit.jupiter
+    testImplementation libs.assertj.core
+    testImplementation libs.spring.boot.starter.test
+    testRuntimeOnly libs.junit.platform.launcher
 }
 
 def generatedSources = layout.buildDirectory.dir('generated/openapi')
