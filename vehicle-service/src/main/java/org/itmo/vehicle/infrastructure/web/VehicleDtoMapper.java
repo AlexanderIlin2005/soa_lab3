@@ -1,11 +1,11 @@
 package org.itmo.vehicle.infrastructure.web;
 
-import jakarta.enterprise.context.ApplicationScoped;
 import org.itmo.vehicle.domain.*;
 import org.itmo.vehicle.domain.query.Page;
 import org.itmo.vehicle.infrastructure.web.generated.model.*;
+import org.springframework.stereotype.Component;
 
-@ApplicationScoped
+@Component
 public class VehicleDtoMapper {
 
     public VehicleDetails toDetails(VehicleCreateRequestDto request) {
