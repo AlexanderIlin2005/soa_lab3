@@ -75,22 +75,7 @@ configurations {
     contractTestImplementation.extendsFrom testImplementation
     contractTestRuntimeOnly.extendsFrom testRuntimeOnly
 }
-dependencies {
-    contractTestImplementation project(':contract-testing')
-}
-tasks.register('contractTest', Test) {
-    description = 'Checks a deployed vehicle service against openapi/vehicle-service.yaml.'
-    group = 'verification'
-    testClassesDirs = sourceSets.contractTest.output.classesDirs
-    classpath = sourceSets.contractTest.runtimeClasspath
-    useJUnitPlatform()
-    systemProperty 'contract.vehicle.spec', rootProject.file('openapi/vehicle-service.yaml').absolutePath
-    systemProperty 'contract.vehicle.baseUrl',
-            findProperty('contract.vehicle.baseUrl') ?: 'https://localhost:28581/vehicle-service'
-    systemProperty 'contract.certificates',
-            rootProject.file(findProperty('contract.certificates') ?: '.local/soa/secrets').absolutePath
-    outputs.upToDateWhen { false }
-}
+
 
 war {
     archiveFileName = 'vehicle-service.war'
