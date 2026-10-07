@@ -10,21 +10,22 @@ import com.fasterxml.jackson.databind.cfg.CoercionInputShape;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.type.LogicalType;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import jakarta.ws.rs.ext.ContextResolver;
-import jakarta.ws.rs.ext.Provider;
 import org.itmo.vehicle.infrastructure.web.generated.model.ProblemDto;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 
-@Provider
-public class JacksonConfiguration implements ContextResolver<ObjectMapper> {
+/**
+ * ObjectMapper с теми же настройками, что были в JAX-RS-версии:
+ * строгая валидация JSON, RFC 3339 даты, запрет коэрсинга String→число
+ * и т.п. Spring Boot подхватит его вместо дефолтного.
+ */
+@Configuration(proxyBeanMethods = false)
+public class JacksonConfiguration {
 
-    private final ObjectMapper mapper = createMapper();
-
-    @Override
-    public ObjectMapper getContext(Class<?> type) {
-        return mapper;
-    }
-
-    private static ObjectMapper createMapper() {
+    @Bean
+    @Primary
+    ObjectMapper objectMapper() {
         JsonMapper mapper = JsonMapper.builder()
                 .addModule(new JavaTimeModule())
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
