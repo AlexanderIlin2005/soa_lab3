@@ -1,42 +1,39 @@
 package org.itmo.vehicle.infrastructure.web;
 
-import jakarta.enterprise.context.Dependent;
-import jakarta.inject.Inject;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
 import org.itmo.vehicle.application.VehicleService;
 import org.itmo.vehicle.infrastructure.web.generated.api.StatisticsApi;
+import org.itmo.vehicle.infrastructure.web.generated.model.EnginePowerSumDto;
+import org.itmo.vehicle.infrastructure.web.generated.model.NumberOfWheelsAverageDto;
+import org.itmo.vehicle.infrastructure.web.generated.model.VehicleDto;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RestController;
 
-@Dependent
-@Path("/vehicles/statistics")
+/**
+ * Реализация StatisticsApi. Пути, методы, коды — из openapi/vehicle-service.yaml.
+ */
+@RestController
 public class StatisticsResource implements StatisticsApi {
 
     private final VehicleService service;
     private final VehicleDtoMapper mapper;
 
-    @Inject
     public StatisticsResource(VehicleService service, VehicleDtoMapper mapper) {
         this.service = service;
         this.mapper = mapper;
     }
 
     @Override
-    public Response getEnginePowerSum() {
-        return json(mapper.toDto(service.enginePowerStatistics()));
+    public ResponseEntity<EnginePowerSumDto> getEnginePowerSum() {
+        return ResponseEntity.ok(mapper.toDto(service.enginePowerStatistics()));
     }
 
     @Override
-    public Response getNumberOfWheelsAverage() {
-        return json(mapper.toDto(service.wheelsStatistics()));
+    public ResponseEntity<NumberOfWheelsAverageDto> getNumberOfWheelsAverage() {
+        return ResponseEntity.ok(mapper.toDto(service.wheelsStatistics()));
     }
 
     @Override
-    public Response getVehicleWithMaxName() {
-        return json(mapper.toDto(service.vehicleWithMaxName()));
-    }
-
-    private static Response json(Object entity) {
-        return Response.ok(entity, MediaType.APPLICATION_JSON_TYPE).build();
+    public ResponseEntity<VehicleDto> getVehicleWithMaxName() {
+        return ResponseEntity.ok(mapper.toDto(service.vehicleWithMaxName()));
     }
 }
