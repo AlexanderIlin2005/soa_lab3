@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<domain xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+        application-root="${com.sun.aas.instanceRoot}/applications"
+        log-root="${com.sun.aas.instanceRoot}/logs">
+
+    <resources>
+        <jdbc-connection-pool name="jdbc/vehiclesPool"
+                              datasource-classname="org.postgresql.ds.PGSimpleDataSource"
+                              res-type="javax.sql.DataSource"
+                              steady-pool-size="8"
+                              max-pool-size="32">
+            <property name="user" value="soa"/>
+            <property name="password" value="soa"/>
+            <property name="serverName" value="pg"/>
+            <property name="portNumber" value="5432"/>
+            <property name="databaseName" value="studs"/>
+        </jdbc-connection-pool>
+
+        <jdbc-resource jndi-name="jdbc/vehicles"
+                       pool-name="jdbc/vehiclesPool"/>
+    </resources>
+
+    <configs>
+        <config name="server-config">
+            <http-service>
+                <access-log/>
+                <virtual-server id="server" network-listeners="http-listener"/>
+                <virtual-server id="__asadmin" network-listeners="admin-listener"/>
+            </http-service>
+            <iiop-service>
+                <orb use-thread-pool-ids="thread-pool-1"/>
+                <iiop-listener address="0.0.0.0" port="0" id="orb-listener-1"/>
+            </iiop-service>
+        </config>
+    </configs>
+</domain>

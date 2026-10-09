@@ -28,7 +28,7 @@ configurations.configureEach {
 
 dependencies {
     implementation platform(libs.spring.boot.dependencies)
-    implementation platform(libs.springCloudDependencies)
+    // implementation platform(libs.springCloudDependencies)
 
     implementation(libs.spring.boot.starter.web) {
         exclude group: 'org.springframework.boot', module: 'spring-boot-starter-tomcat'
@@ -36,8 +36,8 @@ dependencies {
     implementation libs.spring.boot.starter.data.jpa
     implementation libs.spring.boot.starter.validation
 
-    implementation libs.springCloudStarterEurekaClient
-    implementation libs.springCloudStarterConfig
+    // implementation libs.springCloudStarterEurekaClient
+    // implementation libs.springCloudStarterConfig
 
     implementation libs.jackson.dataformat.xml
     implementation libs.jackson.dataformat.yaml

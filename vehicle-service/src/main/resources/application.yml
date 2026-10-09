@@ -6,7 +6,10 @@ spring:
   config:
     import: "optional:configserver:${CONFIG_SERVER_URL:http://config-server:38888}"
   datasource:
-    jndi-name: jdbc/vehicles
+    url: jdbc:postgresql://pg:5432/studs
+    username: soa
+    password: soa
+    driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
       ddl-auto: none

@@ -1,0 +1,21 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.5.16'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+dependencies {
+    implementation platform(libs.spring.boot.dependencies)
+
+    // Payara Micro — лёгкий embedded-сервер, запускается из executable JAR
+    // без install root. Для песочницы хватает её самой.
+    implementation 'fish.payara.extras:payara-micro:6.2025.11'
+}
+
+tasks.named('bootJar') {
+    archiveFileName = 'sandbox.jar'
+    // Точка входа — Payara Micro. Она стартует сервлет-контейнер.
+    mainClass = 'fish.payara.micro.PayaraMicro'
+}
+
+tasks.named('test') { useJUnitPlatform() }
