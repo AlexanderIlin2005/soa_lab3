@@ -1,7 +1,6 @@
 /.idea/
 /.gradle/
 /.gradle/*
-/codebase.txt
 /full_tree.sh
 /vehicle-service/build/
 /shop-service/build/
@@ -15,6 +14,5 @@ build/
 **/build/
 openapi.reference/
 legacy/
-/lab3-step1-prepare.sh
-/lab3-step2a-vehicle-spring.sh
 /gradle/
+/fix.sh
