@@ -17,6 +17,7 @@ dependencies {
 
     runtimeOnly libs.jackson.dataformat.xml
     runtimeOnly libs.jackson.dataformat.yaml
+    implementation "org.springframework.boot:spring-boot-starter-actuator"
 
     providedCompile libs.jakarta.servlet.api
     providedCompile libs.jakarta.validation.api

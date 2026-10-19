@@ -113,5 +113,46 @@ services:
       - eureka
 
 
+  shop-service-1:
+    image: eclipse-temurin:17-jre
+    container_name: lab3-shop-1
+    ports:
+      - "38001:8080"
+    volumes:
+      - ./docker/payara-micro/payara-micro.jar:/app/payara-micro.jar:ro
+      - ./shop-service/build/libs/shop-service.war:/app/shop-service.war:ro
+    environment:
+      VEHICLE_SERVICE_URL: "http://lab3-api-gateway:38080/vehicle-service"
+    command: ["java", "-jar", "/app/payara-micro.jar", "--deploy", "/app/shop-service.war", "--port", "8080", "--noCluster"]
+    depends_on:
+      - api-gateway
+
+  shop-service-2:
+    image: eclipse-temurin:17-jre
+    container_name: lab3-shop-2
+    ports:
+      - "38002:8080"
+    volumes:
+      - ./docker/payara-micro/payara-micro.jar:/app/payara-micro.jar:ro
+      - ./shop-service/build/libs/shop-service.war:/app/shop-service.war:ro
+    environment:
+      VEHICLE_SERVICE_URL: "http://lab3-api-gateway:38080/vehicle-service"
+    command: ["java", "-jar", "/app/payara-micro.jar", "--deploy", "/app/shop-service.war", "--port", "8080", "--noCluster"]
+    depends_on:
+      - api-gateway
+
+  haproxy:
+    image: haproxy:2.9-alpine
+    container_name: lab3-haproxy
+    ports:
+      - "28681:28681"
+      - "8404:8404"
+    volumes:
+      - ./docker/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    depends_on:
+      - shop-service-1
+      - shop-service-2
+
+
 volumes:
   pgdata:
