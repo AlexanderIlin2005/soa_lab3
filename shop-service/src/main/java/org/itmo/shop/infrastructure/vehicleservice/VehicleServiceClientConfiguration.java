@@ -19,10 +19,19 @@ class VehicleServiceClientConfiguration {
 
     @Bean
     VehiclesApi vehiclesApi(RestClient.Builder builder, SslBundles sslBundles, VehicleServiceProperties properties) {
-        ClientHttpRequestFactorySettings settings = ClientHttpRequestFactorySettings
-                .ofSslBundle(sslBundles.getBundle(SSL_BUNDLE))
-                .withTimeouts(properties.connectTimeout(), properties.readTimeout())
-                .withRedirects(ClientHttpRequestFactorySettings.Redirects.DONT_FOLLOW);
+        ClientHttpRequestFactorySettings settings;
+        // Если SSL-бандл сконфигурирован (профиль helios) — используем HTTPS с truststore.
+        // Иначе (локальная разработка) — HTTP без TLS.
+        if (sslBundles.getBundleNames().contains(SSL_BUNDLE)) {
+            settings = ClientHttpRequestFactorySettings
+                    .ofSslBundle(sslBundles.getBundle(SSL_BUNDLE))
+                    .withTimeouts(properties.connectTimeout(), properties.readTimeout())
+                    .withRedirects(ClientHttpRequestFactorySettings.Redirects.DONT_FOLLOW);
+        } else {
+            settings = ClientHttpRequestFactorySettings.defaults()
+                    .withTimeouts(properties.connectTimeout(), properties.readTimeout())
+                    .withRedirects(ClientHttpRequestFactorySettings.Redirects.DONT_FOLLOW);
+        }
         RestClient client = builder
                 .baseUrl(properties.baseUrl())
                 .requestFactory(ClientHttpRequestFactoryBuilder.jdk().build(settings))

@@ -1,14 +1,28 @@
 spring:
   application:
     name: shop-service
-  config:
-    import: optional:file:${soa.secrets-dir}/shop-service.properties
   mvc:
     servlet:
       load-on-startup: 1
   jackson:
     deserialization:
       adjust-dates-to-context-time-zone: false
+
+vehicle-service:
+  base-url: ${VEHICLE_SERVICE_URL:http://sandbox-payara:8080/vehicle-service}
+  connect-timeout: 2s
+  read-timeout: 5s
+
+soa:
+  cors:
+    allowed-origins: "${CORS_ORIGINS:}"
+
+---
+# Профиль helios: HTTPS через самоподписанный сертификат
+spring:
+  config:
+    activate:
+      on-profile: helios
   ssl:
     bundle:
       jks:
@@ -19,6 +33,4 @@ spring:
             type: PKCS12
 
 vehicle-service:
-  base-url: https://localhost:${soa.vehicle-https-port}/vehicle-service
-  connect-timeout: 2s
-  read-timeout: 5s
+  base-url: ${VEHICLE_SERVICE_URL:https://localhost:28581/vehicle-service}

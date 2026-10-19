@@ -1,0 +1,27 @@
+server:
+  port: ${REGISTRAR_PORT:38090}
+
+spring:
+  application:
+    name: vehicle-service
+  cloud:
+    loadbalancer:
+      enabled: true
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://lab3-eureka:38761/eureka/}
+    register-with-eureka: true
+    fetch-registry: false
+    jersey:
+      enabled: false   # отключаем jersey-транспорт, используем RestClient
+  instance:
+    hostname: ${VEHICLE_SERVICE_HOST:sandbox-payara}
+    non-secure-port: ${VEHICLE_SERVICE_PORT:8080}
+    non-secure-port-enabled: true
+    secure-port-enabled: false
+    prefer-ip-address: false
+    instance-id: vehicle-service:${VEHICLE_SERVICE_HOST:sandbox-payara}:${VEHICLE_SERVICE_PORT:8080}
+    status-page-url: http://${VEHICLE_SERVICE_HOST:sandbox-payara}:${VEHICLE_SERVICE_PORT:8080}/vehicle-service/actuator/info
+    health-check-url: http://${VEHICLE_SERVICE_HOST:sandbox-payara}:${VEHICLE_SERVICE_PORT:8080}/vehicle-service/actuator/health

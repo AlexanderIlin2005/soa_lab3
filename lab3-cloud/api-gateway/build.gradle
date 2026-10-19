@@ -5,11 +5,19 @@ plugins {
 }
 
 dependencies {
+    implementation platform(libs.spring.boot.dependencies)
     implementation platform(libs.springCloudDependencies)
+
+    // Spring Cloud Gateway (WebFlux)
     implementation libs.springCloudStarterGateway
+
+    // Eureka + LoadBalancer
     implementation libs.springCloudStarterEurekaClient
     implementation libs.springCloudStarterLoadbalancer
+
+    // Actuator — чтобы видеть /actuator/gateway/routes
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
 }
 
 tasks.named('bootJar') { archiveFileName = 'api-gateway.jar' }
-tasks.named('test')    { useJUnitPlatform() }
+tasks.named('test') { useJUnitPlatform() }

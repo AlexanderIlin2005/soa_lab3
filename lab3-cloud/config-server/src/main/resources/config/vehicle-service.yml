@@ -1,0 +1,5 @@
+# Конфиг для vehicle-service через Config Server.
+logging:
+  level:
+    org.springframework.web: INFO
+    com.netflix.discovery: INFO
