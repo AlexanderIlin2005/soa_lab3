@@ -1,0 +1,15 @@
+server:
+  port: 38090
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://127.0.0.1:38761/eureka/
+  instance:
+    hostname: 127.0.0.1
+    non-secure-port: 8080
+    prefer-ip-address: true
+    ip-address: 127.0.0.1
+    instance-id: vehicle-service:127.0.0.1:8080
+    status-page-url: http://127.0.0.1:8080/vehicle-service/actuator/info
+    health-check-url: http://127.0.0.1:8080/vehicle-service/actuator/health

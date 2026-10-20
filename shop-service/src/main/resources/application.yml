@@ -16,21 +16,3 @@ vehicle-service:
 soa:
   cors:
     allowed-origins: "${CORS_ORIGINS:}"
-
----
-# Профиль helios: HTTPS через самоподписанный сертификат
-spring:
-  config:
-    activate:
-      on-profile: helios
-  ssl:
-    bundle:
-      jks:
-        vehicle-service:
-          truststore:
-            location: file:${soa.secrets-dir}/shop-truststore.p12
-            password: ${soa.truststore-password}
-            type: PKCS12
-
-vehicle-service:
-  base-url: ${VEHICLE_SERVICE_URL:https://localhost:28581/vehicle-service}

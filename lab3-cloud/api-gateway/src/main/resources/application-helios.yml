@@ -1,0 +1,21 @@
+server:
+  port: 38080
+
+spring:
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+          filters: []
+      routes:
+        - id: vehicle-service-static
+          uri: http://127.0.0.1:8080
+          predicates:
+            - Path=/vehicle-service/**
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://127.0.0.1:38761/eureka/

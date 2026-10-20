@@ -1,0 +1,30 @@
+# Профиль helios — реальный Postgres на 127.0.0.1:5432, схема s381032.
+spring:
+  datasource:
+    url: jdbc:postgresql://127.0.0.1:5432/studs
+    username: s381032
+    password: UVos.8847
+  flyway:
+    schemas: s381032
+    table: soa_flyway_history
+    baseline-on-migrate: true
+    baseline-version: "0"
+  config:
+    import: "optional:configserver:http://127.0.0.1:38888"
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://127.0.0.1:38761/eureka/
+    register-with-eureka: false
+    fetch-registry: false
+  instance:
+    prefer-ip-address: true
+    non-secure-port-enabled: true
+    secure-port-enabled: false
+    status-page-url: http://127.0.0.1:8080/vehicle-service/actuator/info
+    health-check-url: http://127.0.0.1:8080/vehicle-service/actuator/health
+
+soa:
+  cors:
+    allowed-origins: "https://se.ifmo.ru,http://se.ifmo.ru,https://helios.cs.ifmo.ru,http://helios.cs.ifmo.ru"
