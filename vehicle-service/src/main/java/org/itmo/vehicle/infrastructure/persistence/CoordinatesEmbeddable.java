@@ -13,7 +13,6 @@ public class CoordinatesEmbeddable {
     private int y;
 
     protected CoordinatesEmbeddable() {
-        // for JPA
     }
 
     public CoordinatesEmbeddable(int x, int y) {

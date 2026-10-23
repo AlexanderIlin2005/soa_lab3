@@ -13,11 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.net.URI;
 import java.util.List;
 
-/**
- * Реализация VehiclesApi. Пути, методы, коды ответов — из
- * openapi/vehicle-service.yaml. Генерируемый интерфейс тот же по
- * смыслу, что и раньше (только собран spring-генератором).
- */
 @RestController
 public class VehicleResource implements VehiclesApi {
 

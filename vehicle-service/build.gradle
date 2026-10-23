@@ -9,10 +9,6 @@ configurations.configureEach {
     exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
     exclude group: 'com.fasterxml.jackson.module', module: 'jackson-module-jakarta-xmlbind-annotations'
     resolutionStrategy {
-        // Подмена координат — сильнее, чем force, и обходит BOM Spring Boot.
-        // Прижимаем версию Jackson в WAR к той, что даёт Payara 6.2025.11,
-        // чтобы модуль JakartaXmlBindAnnotationModule из Payara
-        // наследовался от Module из WAR без VerifyError.
         dependencySubstitution {
             substitute module('com.fasterxml.jackson.core:jackson-core') using module('com.fasterxml.jackson.core:jackson-core:2.20.0')
             substitute module('com.fasterxml.jackson.core:jackson-databind') using module('com.fasterxml.jackson.core:jackson-databind:2.20.0')
@@ -28,16 +24,12 @@ configurations.configureEach {
 
 dependencies {
     implementation platform(libs.spring.boot.dependencies)
-    // implementation platform(libs.springCloudDependencies)
 
     implementation(libs.spring.boot.starter.web) {
         exclude group: 'org.springframework.boot', module: 'spring-boot-starter-tomcat'
     }
     implementation libs.spring.boot.starter.data.jpa
     implementation libs.spring.boot.starter.validation
-
-    // implementation libs.springCloudStarterEurekaClient
-    // implementation libs.springCloudStarterConfig
 
     implementation libs.jackson.dataformat.xml
     implementation libs.jackson.dataformat.yaml

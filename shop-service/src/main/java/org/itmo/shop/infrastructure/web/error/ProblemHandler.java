@@ -115,7 +115,6 @@ class ProblemHandler extends ResponseEntityExceptionHandler {
 
     private static String expected(Class<?> type) {
         if (type != null && type.isEnum()) {
-            // the generated enums print their contract value
             return Arrays.stream(type.getEnumConstants())
                     .map(String::valueOf)
                     .collect(Collectors.joining(", ", "must be one of ", ""));

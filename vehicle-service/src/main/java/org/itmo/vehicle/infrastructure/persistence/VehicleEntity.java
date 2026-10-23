@@ -41,7 +41,6 @@ public class VehicleEntity {
     private FuelType fuelType;
 
     protected VehicleEntity() {
-        // for JPA
     }
 
     public VehicleEntity(OffsetDateTime creationDate) {

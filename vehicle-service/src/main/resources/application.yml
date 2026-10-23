@@ -17,11 +17,6 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-        # Hibernate 6 при создании FormatMapper вызывает
-        # ObjectMapper.findAndRegisterModules(), который через ServiceLoader
-        # находит JakartaXmlBindAnnotationModule из Payara и падает с
-        # "not a subtype" (разные classloader'ы). Наш NoScanJsonFormatMapper
-        # этого не делает.
         type:
           json_format_mapper: org.itmo.vehicle.infrastructure.persistence.NoScanJsonFormatMapper
   flyway:

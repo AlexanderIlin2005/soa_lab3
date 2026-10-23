@@ -15,7 +15,7 @@ eureka:
     register-with-eureka: true
     fetch-registry: false
     jersey:
-      enabled: false   # отключаем jersey-транспорт, используем RestClient
+      enabled: false
   instance:
     hostname: ${VEHICLE_SERVICE_HOST:sandbox-payara}
     non-secure-port: ${VEHICLE_SERVICE_PORT:8080}

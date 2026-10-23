@@ -8,9 +8,6 @@ import org.itmo.vehicle.infrastructure.web.generated.model.VehicleDto;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * Реализация StatisticsApi. Пути, методы, коды — из openapi/vehicle-service.yaml.
- */
 @RestController
 public class StatisticsResource implements StatisticsApi {
 

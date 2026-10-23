@@ -1,4 +1,3 @@
-# Конфиг для api-gateway через Config Server.
 logging:
   level:
     org.springframework.cloud.gateway: INFO

@@ -6,11 +6,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.function.Supplier;
 
-/**
- * Spring-вариант TransactionRunner. {@code @Transactional} теперь
- * из Spring Framework, а не из Jakarta EE — управление транзакциями
- * идёт через JpaTransactionManager поверх DataSource из JNDI.
- */
 @Component
 public class JtaTransactionRunner implements TransactionRunner {
 

@@ -85,7 +85,6 @@ class VehicleQueryParserTest {
 
     @Test
     void hintsAtEncodingOfPlusSign() {
-        // an unencoded + arrives as a space
         assertThatThrownBy(() -> filter("creationDate:gt:2026-09-10T08:19:00 03:00"))
                 .isInstanceOf(InvalidParameterException.class)
                 .hasMessageContaining("%2B");

@@ -1,9 +1,8 @@
-# Профиль helios — реальный Postgres на 127.0.0.1:5432, схема s381032.
 spring:
   datasource:
     url: jdbc:postgresql://127.0.0.1:5432/studs
     username: s381032
-    password: UVos.8847
+    password: ${DB_PASSWORD}
   flyway:
     schemas: s381032
     table: soa_flyway_history

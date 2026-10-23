@@ -16,7 +16,6 @@ public record VehicleDetails(
         if (coordinates == null) {
             throw new InvariantViolationException("coordinates", "must be present");
         }
-        // !(x > 0) also rejects NaN
         if (!(enginePower > 0) || Float.isInfinite(enginePower)) {
             throw new InvariantViolationException("enginePower", "must be a finite number greater than zero");
         }

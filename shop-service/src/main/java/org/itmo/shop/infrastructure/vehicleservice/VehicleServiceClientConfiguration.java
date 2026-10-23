@@ -20,8 +20,6 @@ class VehicleServiceClientConfiguration {
     @Bean
     VehiclesApi vehiclesApi(RestClient.Builder builder, SslBundles sslBundles, VehicleServiceProperties properties) {
         ClientHttpRequestFactorySettings settings;
-        // Если SSL-бандл сконфигурирован (профиль helios) — используем HTTPS с truststore.
-        // Иначе (локальная разработка) — HTTP без TLS.
         if (sslBundles.getBundleNames().contains(SSL_BUNDLE)) {
             settings = ClientHttpRequestFactorySettings
                     .ofSslBundle(sslBundles.getBundle(SSL_BUNDLE))

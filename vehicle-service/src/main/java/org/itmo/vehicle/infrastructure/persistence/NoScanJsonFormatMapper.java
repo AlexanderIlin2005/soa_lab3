@@ -7,21 +7,6 @@ import org.hibernate.type.descriptor.java.JavaType;
 import org.hibernate.type.format.FormatMapper;
 import org.hibernate.type.format.jackson.JacksonJsonFormatMapper;
 
-/**
- * Обёртка над {@link JacksonJsonFormatMapper}, которая НЕ вызывает
- * {@code ObjectMapper.findAndRegisterModules()}.
- *
- * Hibernate 6.6 при создании FormatMapper по умолчанию строит
- * JacksonJsonFormatMapper через конструктор без аргументов, который
- * вызывает findAndRegisterModules(). В classpath Payara есть
- * jackson-module-jakarta-xmlbind-annotations.jar, чей
- * JakartaXmlBindAnnotationModule загружен ДРУГИМ classloader'ом
- * и не наследуется от Module из WAR. Это даёт
- * "com.fasterxml.jackson.databind.Module: ... not a subtype".
- *
- * Наш маппер сам создаёт ObjectMapper и регистрирует только
- * JavaTimeModule — ServiceLoader не вызывается.
- */
 public class NoScanJsonFormatMapper implements FormatMapper {
 
     private final JacksonJsonFormatMapper delegate;

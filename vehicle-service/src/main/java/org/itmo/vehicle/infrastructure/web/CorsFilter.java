@@ -13,11 +13,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.Set;
 
-/**
- * CORS для web-client, открытого с se.ifmo.ru. Заголовки ставятся
- * только для origins из soa.cors.allowed-origins; остальные — без CORS,
- * браузер сам не даст странице читать ответ.
- */
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class CorsFilter extends OncePerRequestFilter {

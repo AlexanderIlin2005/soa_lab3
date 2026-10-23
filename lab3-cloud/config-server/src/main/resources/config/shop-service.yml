@@ -1,4 +1,3 @@
-# Конфиг для shop-service через Config Server.
 logging:
   level:
     org.itmo.shop: INFO

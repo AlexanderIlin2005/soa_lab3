@@ -18,9 +18,6 @@ public final class Vehicle {
         this.details = Objects.requireNonNull(details, "details");
     }
 
-    /**
-     * Full replacement (PUT): the identity and the creation date stay.
-     */
     public Vehicle withDetails(VehicleDetails newDetails) {
         return new Vehicle(id, creationDate, newDetails);
     }

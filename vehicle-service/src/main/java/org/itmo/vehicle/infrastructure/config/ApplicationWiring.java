@@ -8,11 +8,6 @@ import org.springframework.context.annotation.Configuration;
 
 import java.time.Clock;
 
-/**
- * Spring-конфигурация доменных сервисов. Заменяет CDI {@code @Produces}.
- * VehicleService, VehicleRepository и TransactionRunner — фреймворк-
- * агностичные классы, поэтому оборачиваем их в {@code @Bean} вручную.
- */
 @Configuration(proxyBeanMethods = false)
 public class ApplicationWiring {
 

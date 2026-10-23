@@ -13,12 +13,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.Set;
 
-/**
- * Cross-origin access for the web client opened from se.ifmo.ru. The same
- * rules as in the vehicle service: only the origins in soa.cors.allowed-origins
- * get the headers, error responses included; any other origin gets the plain
- * response, which the browser then does not let the page read.
- */
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
 class CorsFilter extends OncePerRequestFilter {

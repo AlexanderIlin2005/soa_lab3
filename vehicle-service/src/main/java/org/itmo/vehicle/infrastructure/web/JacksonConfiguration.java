@@ -15,11 +15,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
-/**
- * ObjectMapper с теми же настройками, что были в JAX-RS-версии:
- * строгая валидация JSON, RFC 3339 даты, запрет коэрсинга String→число
- * и т.п. Spring Boot подхватит его вместо дефолтного.
- */
 @Configuration(proxyBeanMethods = false)
 public class JacksonConfiguration {
 

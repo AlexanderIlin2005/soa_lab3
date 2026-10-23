@@ -7,9 +7,6 @@ public sealed interface Criterion permits Criterion.Comparison, Criterion.Like, 
 
     VehicleField field();
 
-    /**
-     * eq, neq, gt, gte, lt, lte.
-     */
     record Comparison(VehicleField field, Operator operator, Object value) implements Criterion {
         public Comparison {
             if (!operator.isComparison()) {
