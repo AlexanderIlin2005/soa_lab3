@@ -2,6 +2,7 @@ package org.itmo.vehicle.infrastructure.web.error;
 
 import org.itmo.vehicle.infrastructure.web.InvalidParameterException;
 import org.itmo.vehicle.infrastructure.web.generated.model.ProblemDto;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.util.List;
 
 @RestControllerAdvice
+@Order(0)
 public class InvalidParameterExceptionMapper {
 
     @ExceptionHandler(InvalidParameterException.class)

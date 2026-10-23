@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import org.itmo.vehicle.infrastructure.web.generated.model.ProblemDto;
 import org.itmo.vehicle.infrastructure.web.generated.model.ValidationErrorDto;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestControllerAdvice
+@Order(0)
 public class ConstraintViolationExceptionMapper {
 
     private static final Map<String, String> PATTERN_MEANINGS = Map.of(
@@ -37,7 +39,7 @@ public class ConstraintViolationExceptionMapper {
         return Problems.response(400, "The request violates constraints of the contract.", errors);
     }
 
-    private static String message(ConstraintViolation<?> violation) {
+    static String message(ConstraintViolation<?> violation) {
         if (violation.getConstraintDescriptor().getAnnotation() instanceof Pattern pattern) {
             return PATTERN_MEANINGS.getOrDefault(pattern.regexp(), violation.getMessage());
         }

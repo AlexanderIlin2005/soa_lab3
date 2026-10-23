@@ -1,6 +1,8 @@
 package org.itmo.vehicle.infrastructure.web.error;
 
 import org.itmo.vehicle.infrastructure.web.generated.model.ProblemDto;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -9,6 +11,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @RestControllerAdvice
+@Order(Ordered.LOWEST_PRECEDENCE)
 public class UnexpectedExceptionMapper {
 
     private static final Logger LOG = Logger.getLogger(UnexpectedExceptionMapper.class.getName());

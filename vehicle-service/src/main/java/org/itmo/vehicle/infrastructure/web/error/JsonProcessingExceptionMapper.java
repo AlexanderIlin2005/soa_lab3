@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import com.fasterxml.jackson.databind.exc.ValueInstantiationException;
 import org.itmo.vehicle.infrastructure.web.generated.model.ProblemDto;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -15,10 +16,15 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
+@Order(0)
 public class JsonProcessingExceptionMapper {
 
     @ExceptionHandler(JsonProcessingException.class)
     ResponseEntity<ProblemDto> badJson(JsonProcessingException exception) {
+        return problem(exception);
+    }
+
+    static ResponseEntity<ProblemDto> problem(JsonProcessingException exception) {
         if (exception instanceof JsonMappingException mapping && !mapping.getPath().isEmpty()) {
             return Problems.response(400, "The request body does not match the schema.",
                     List.of(Problems.error(pointer(mapping), describe(mapping))));

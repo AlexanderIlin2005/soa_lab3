@@ -4,8 +4,8 @@ skinparam defaultFontName Helvetica
 skinparam defaultFontSize 12
 skinparam shadowing false
 skinparam dpi 150
-skinparam nodesep 45
-skinparam ranksep 70
+skinparam nodesep 40
+skinparam ranksep 60
 skinparam roundCorner 6
 skinparam node {
   BackgroundColor #F7F9FC
@@ -20,23 +20,15 @@ skinparam database {
   BackgroundColor #FFFFFF
   BorderColor #1F8A53
 }
-skinparam folder {
-  BackgroundColor #FFFFFF
-  BorderColor #8A6D1F
-}
 skinparam rectangle {
   BackgroundColor #FFFFFF
   BorderColor #9AA3B2
   BorderStyle dashed
 }
-skinparam note {
-  BackgroundColor #FFF8E1
-  BorderColor #C9A227
-}
 skinparam ArrowColor #4A5568
 skinparam ArrowFontSize 11
 
-title Лабораторная работа №2 по СОА: схема развёртывания
+title Лабораторная работа №3 по СОА: схема развёртывания
 
 node "Компьютер пользователя" <<device>> as pc {
   node "Веб-браузер" <<executionEnvironment>> as browser {
@@ -48,32 +40,63 @@ node "Компьютер пользователя" <<device>> as pc {
 rectangle "Сеть ИТМО" as itmo {
 
   node "se.ifmo.ru" <<device>> as se {
-      artifact "/~s408517/soa/lab2/\nстатические файлы веб-клиента" as pubweb
+    artifact "/<U+007E>s408517/soa/lab2/\nстатические файлы веб-клиента" as pubweb
   }
 
   node "helios.cs.ifmo.ru\nFreeBSD 14.5, OpenJDK 17" <<device>> as helios {
-    node "Payara Server 6, домен vehicle\nHTTPS :28581\nadmin :28548 только на 127.0.0.1" <<executionEnvironment>> as vehicle {
-      artifact "vehicle-service.war\nсервис 1: JAX-RS (Jersey),\nJPA (EclipseLink), Flyway" as vwar
+
+    rectangle "аккаунт s381032" as acc1 {
+      node "HAProxy\nHTTPS :28581, :28681\nстатистика :8404" <<executionEnvironment>> as haproxy
+      node "JVM, :38080" <<executionEnvironment>> as gw {
+        artifact "api-gateway.jar\nSpring Cloud Gateway\n+ LoadBalancer" as gwjar
+      }
+      node "JVM, :38090" <<executionEnvironment>> as reg {
+        artifact "vehicle-registrar.jar\nрегистрирует сервис 1\nв Eureka" as regjar
+      }
+      node "Payara Micro 6, :8080" <<executionEnvironment>> as v1 {
+        artifact "vehicle-service.war\nсервис 1: Spring MVC,\nJPA (Hibernate), Flyway" as vwar
+      }
+      node "Payara Micro 6, :8081" <<executionEnvironment>> as s1 {
+        artifact "shop-service.war\nсервис 2, экземпляр 1" as s1war
+      }
+      node "Payara Micro 6, :8082" <<executionEnvironment>> as s2 {
+        artifact "shop-service.war\nсервис 2, экземпляр 2" as s2war
+      }
     }
-    node "Payara Server 6, домен shop\nHTTPS :28681\nadmin :28648 только на 127.0.0.1" <<executionEnvironment>> as shop {
-      artifact "shop-service.war\nсервис 2: Spring MVC" as swar
-      artifact "client.war\n/client" as cwar
-      artifact "swagger.war\n/swagger" as swwar
+
+    rectangle "аккаунт s408517" as acc2 {
+      node "JVM, :38761" <<executionEnvironment>> as eur {
+        artifact "eureka-server.jar\nEureka Server" as eurjar
+      }
+      node "JVM, :38888" <<executionEnvironment>> as cfg {
+        artifact "config-server.jar\nConfig Server, native" as cfgjar
+      }
     }
-    folder "<U+007E>/public_html/soa/lab2" as pubdir
+
     node "sshd :2222" <<executionEnvironment>> as sshd
   }
 
   node "pg\nPostgreSQL 16" <<device>> as pg {
-    database "БД studs, схема s408517\nsoa_vehicle, soa_flyway_history" as db
+    database "БД studs, схема s381032\nsoa_vehicle, soa_flyway_history" as db
   }
 }
 
-spa --> vwar : HTTPS :28581\nREST/JSON, CORS
-spa --> swar : HTTPS :28681\nREST/JSON, CORS
-swar --> vwar : HTTPS :28581 (localhost)\nREST/JSON; доверяет только\nсертификату сервиса 1
-vwar --> db : JDBC :5432\nпул jdbc/vehicles
-pubdir ..> pubweb : раздаётся как\nse.ifmo.ru/~s408517/
+spa --> haproxy : HTTPS :28581, :28681\nREST/JSON, CORS
+pubweb ..> spa : загрузка\nстраницы
 sshc ..> sshd : SSH :2222, туннель\n-L 28581 -L 28681\n(вне сети ИТМО)
+
+haproxy --> gwjar : :28581 → HTTP :38080
+haproxy --> s1war : :28681 → HTTP,\nпо кругу
+haproxy --> s2war
+
+s1war --> gwjar : вызовы сервиса 1\nHTTP :38080
+s2war --> gwjar
+
+gwjar --> vwar : /vehicle-service/**\nlb://VEHICLE-SERVICE
+vwar --> db : JDBC :5432
+
+regjar ..> eurjar : VEHICLE-SERVICE =\n127.0.0.1:8080
+gwjar ..> eurjar : регистрация,\nреестр
+cfgjar ..> eurjar : регистрация
 
 @enduml
