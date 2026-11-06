@@ -1,0 +1,94 @@
+@startuml lab4-deployment
+!pragma layout smetana
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 12
+skinparam shadowing false
+skinparam dpi 150
+skinparam nodesep 40
+skinparam ranksep 60
+skinparam roundCorner 6
+skinparam node {
+  BackgroundColor #F7F9FC
+  BorderColor #4A5568
+  StereotypeFontColor #4A5568
+}
+skinparam artifact {
+  BackgroundColor #FFFFFF
+  BorderColor #2F5BD3
+}
+skinparam database {
+  BackgroundColor #FFFFFF
+  BorderColor #1F8A53
+}
+skinparam ArrowColor #4A5568
+skinparam ArrowFontSize 11
+
+title Лабораторная работа №4 по СОА: схема развёртывания
+
+node "Компьютер пользователя" <<device>> as pc {
+  node "Веб-браузер" <<executionEnvironment>> as browser {
+    artifact "Веб-клиент ЛР2\nHTML, CSS, JavaScript\n(без изменений)" as spa
+  }
+  node "SSH-клиент" <<executionEnvironment>> as sshc
+}
+
+node "VPS\nUbuntu 24.04, x86-64, OpenJDK 17\n6 vCPU, 6 ГБ RAM" <<device>> as vps {
+
+  node "HAProxy\nHTTPS :28581 → api-gateway\nHTTPS :28681 → Mule;\n/client, /swagger, /shop-soap → WildFly\nстатистика 127.0.0.1:8404" <<executionEnvironment>> as haproxy
+
+  node "Mule ESB 4.12.0 Kernel (CE)\nприложение shop-esb-1.0.0-mule-application.jar" <<executionEnvironment>> as mule {
+    artifact "REST-прослойка, :8091\nflows rest-search-by-type,\nrest-fix-distance" as esb
+    artifact "мост к сервису 1, :8092\nflow vehicle-bridge" as bridge
+  }
+
+  node "WildFly 42, :8180" <<executionEnvironment>> as wildfly {
+    artifact "shop-soap.war\nсервис 2: SOAP 1.1, JAX-WS" as soap
+    artifact "client.war, swagger.war\nстатические файлы" as web
+  }
+
+  node "JVM, :38080" <<executionEnvironment>> as gw {
+    artifact "api-gateway.jar\nSpring Cloud Gateway" as gwjar
+  }
+
+  node "JVM, :38761" <<executionEnvironment>> as eur {
+    artifact "eureka-server.jar\nEureka Server" as eurjar
+  }
+
+  node "JVM, :38888" <<executionEnvironment>> as cfg {
+    artifact "config-server.jar\nConfig Server, native" as cfgjar
+  }
+
+  node "JVM, :38090" <<executionEnvironment>> as reg {
+    artifact "vehicle-registrar.jar\nрегистрирует сервис 1\nв Eureka" as regjar
+  }
+
+  node "Payara Micro 6, :8080" <<executionEnvironment>> as v1 {
+    artifact "vehicle-service.war\nсервис 1: Spring MVC,\nJPA (Hibernate), Flyway\n(без изменений)" as vwar
+  }
+
+  node "PostgreSQL 16, :5432" <<executionEnvironment>> as pg {
+    database "БД vehicle_db, владелец vehicle_app\nсхема soa: soa_vehicle,\nsoa_flyway_history" as db
+  }
+
+  node "sshd :22" <<executionEnvironment>> as sshd
+}
+
+web ..> spa : загрузка страницы\nчерез HAProxy :28681 → HTTP :8180
+spa --> haproxy : HTTPS :28681 — сервис 2, REST/JSON\nHTTPS :28581 — сервис 1, REST/JSON, CORS
+sshc ..> sshd : SSH :22, туннель\nк Eureka и WildFly management
+
+haproxy --> esb : /shop-service/**\n→ HTTP :8091
+haproxy --> gwjar : :28581 → HTTP :38080
+
+esb --> soap : SOAP 1.1 / HTTP\nPOST /shop-soap/ShopService
+soap --> bridge : вызовы сервиса 1\nREST/JSON → HTTP :8092
+bridge --> gwjar : /vehicle-service/**\n→ HTTP :38080
+
+gwjar --> vwar : HTTP :8080
+vwar --> db : JDBC :5432
+
+regjar ..> eurjar : VEHICLE-SERVICE =\n127.0.0.1:8080
+gwjar ..> eurjar : регистрация,\nреестр
+cfgjar ..> eurjar : регистрация
+
+@enduml
