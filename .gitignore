@@ -20,3 +20,4 @@ legacy/
 *.bak
 *.before-*
 .backup-working-state/
+target/
