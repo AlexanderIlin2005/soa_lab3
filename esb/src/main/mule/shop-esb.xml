@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core"
+      xmlns:http="http://www.mulesoft.org/schema/mule/http"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+                          http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+
+    <configuration-properties file="shop-esb.properties"/>
+
+    <http:listener-config name="rest-listener">
+        <http:listener-connection host="${rest.host}" port="${rest.port}"/>
+    </http:listener-config>
+
+    <http:listener-config name="bridge-listener">
+        <http:listener-connection host="${bridge.host}" port="${bridge.port}"/>
+    </http:listener-config>
+
+    <http:request-config name="shop-soap-request">
+        <http:request-connection host="${soap.host}" port="${soap.port}"/>
+    </http:request-config>
+
+    <http:request-config name="gateway-request">
+        <http:request-connection host="${gateway.host}" port="${gateway.port}"/>
+    </http:request-config>
+
+    <flow name="rest-search-by-type">
+        <http:listener config-ref="rest-listener" path="/shop-service/shop/search/by-type/{type}" allowedMethods="GET">
+            <http:response statusCode="#[vars.status default 200]">
+                <http:headers>#[{'Content-Type': vars.contentType default 'application/json'}]</http:headers>
+            </http:response>
+        </http:listener>
+        <set-variable variableName="instance" value="#[attributes.requestPath]"/>
+        <set-payload value="#[%dw 2.0&#10;output application/xml&#10;ns soap http://schemas.xmlsoap.org/soap/envelope/&#10;ns shop http://itmo.org/soa/shop&#10;---&#10;{soap#Envelope: {soap#Body: {shop#searchByType: {'type': attributes.uriParams.'type'}}}}]"/>
+        <flow-ref name="call-shop-soap"/>
+        <choice>
+            <when expression="#[vars.soapStatus == 200]">
+                <set-payload value="#[%dw 2.0&#10;output application/json indent=false&#10;import * from shop::Mapping&#10;---&#10;vehicles(payload)]"/>
+            </when>
+            <otherwise>
+                <flow-ref name="fault-to-problem"/>
+            </otherwise>
+        </choice>
+        <error-handler ref="rest-errors"/>
+    </flow>
+
+    <flow name="rest-fix-distance">
+        <http:listener config-ref="rest-listener" path="/shop-service/shop/fix-distance/{vehicle-id}" allowedMethods="POST">
+            <http:response statusCode="#[vars.status default 200]">
+                <http:headers>#[{'Content-Type': vars.contentType default 'application/json'}]</http:headers>
+            </http:response>
+        </http:listener>
+        <set-variable variableName="instance" value="#[attributes.requestPath]"/>
+        <set-payload value="#[%dw 2.0&#10;output application/xml&#10;ns soap http://schemas.xmlsoap.org/soap/envelope/&#10;ns shop http://itmo.org/soa/shop&#10;---&#10;{soap#Envelope: {soap#Body: {shop#fixDistance: {vehicleId: attributes.uriParams.'vehicle-id'}}}}]"/>
+        <flow-ref name="call-shop-soap"/>
+        <choice>
+            <when expression="#[vars.soapStatus == 200]">
+                <set-payload value="#[%dw 2.0&#10;output application/json indent=false&#10;import * from shop::Mapping&#10;---&#10;fixedVehicle(payload)]"/>
+            </when>
+            <otherwise>
+                <flow-ref name="fault-to-problem"/>
+            </otherwise>
+        </choice>
+        <error-handler ref="rest-errors"/>
+    </flow>
+
+    <sub-flow name="call-shop-soap">
+        <http:request config-ref="shop-soap-request" method="POST" path="${soap.path}">
+            <http:headers>#[{'Content-Type': 'text/xml; charset=UTF-8', 'SOAPAction': '""'}]</http:headers>
+            <http:response-validator>
+                <http:success-status-code-validator values="200,500"/>
+            </http:response-validator>
+        </http:request>
+        <set-variable variableName="soapStatus" value="#[attributes.statusCode]"/>
+    </sub-flow>
+
+    <sub-flow name="fault-to-problem">
+        <set-payload value="#[%dw 2.0&#10;output application/json indent=false&#10;import * from shop::Mapping&#10;---&#10;problem(payload, vars.instance)]"/>
+        <set-variable variableName="status" value="#[payload.status]"/>
+        <set-variable variableName="contentType" value="application/problem+json"/>
+    </sub-flow>
+
+    <error-handler name="rest-errors">
+        <on-error-continue type="ANY">
+            <logger level="WARN" message="#['Shop SOAP call failed: ' ++ (error.description default '')]"/>
+            <set-payload value="#[%dw 2.0&#10;output application/json indent=false&#10;import * from shop::Mapping&#10;---&#10;internalError(vars.instance)]"/>
+            <set-variable variableName="status" value="#[500]"/>
+            <set-variable variableName="contentType" value="application/problem+json"/>
+        </on-error-continue>
+    </error-handler>
+
+    <flow name="vehicle-bridge">
+        <http:listener config-ref="bridge-listener" path="/vehicle-service/*">
+            <http:response statusCode="#[vars.status default 502]">
+                <http:headers>#[vars.headers default {}]</http:headers>
+            </http:response>
+        </http:listener>
+        <http:request config-ref="gateway-request" method="#[attributes.method]" path="#[attributes.requestPath]">
+            <http:headers>#[{'Accept': attributes.headers.accept default 'application/json'} ++ (if (attributes.headers.'content-type' != null) {'Content-Type': attributes.headers.'content-type'} else {})]</http:headers>
+            <http:query-params>#[attributes.queryParams]</http:query-params>
+            <http:response-validator>
+                <http:success-status-code-validator values="100..599"/>
+            </http:response-validator>
+        </http:request>
+        <set-variable variableName="status" value="#[attributes.statusCode]"/>
+        <set-variable variableName="headers" value="#[{'Content-Type': attributes.headers.'content-type' default 'application/json'}]"/>
+    </flow>
+</mule>
